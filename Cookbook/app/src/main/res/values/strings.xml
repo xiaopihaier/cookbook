@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">一日三餐</string>
+    <string name="saying">广厦千间，夜眠仅需六尺；家财万贯，日食不过三餐！</string>
+    <string name="username_input">账号</string>
+    <string name="password_input">密码</string>
+    <string name="login">登录</string>
+    <string name="forget_password">忘记密码</string>
+    <string name="register">注册</string>
+    <string name="input_password">1234567890.A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h i j k l m n o p q r s t u v w x y z</string>
+</resources>
