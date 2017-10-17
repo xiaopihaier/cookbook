@@ -112,7 +112,8 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
                 break;
             //登陆按钮
             case R.id.login:
-
+                username_input.getText().toString().trim();
+                password_input.getText().toString().trim();
                 break;
             //忘记密码
             case R.id.forget_password:
