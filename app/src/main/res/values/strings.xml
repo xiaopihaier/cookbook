@@ -8,4 +8,5 @@
     <string name="register">注册</string>
     <string name="input_password">1234567890.A B C D E F G H I J K L M N O P Q R S T U V W X Y Z a b c d e f g h i j k l m n o p q r s t u v w x y z</string>
     <string name="Confirmation_password">确认密码</string>
+    <string name="Confirmation_modification">确认修改</string>
 </resources>
