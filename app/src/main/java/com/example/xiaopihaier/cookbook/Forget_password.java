@@ -4,10 +4,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
 
-public class Forget_password extends AppCompatActivity {
+public class Forget_password extends AppCompatActivity implements View.OnClickListener {
+
+    ImageView black;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +25,12 @@ public class Forget_password extends AppCompatActivity {
         myWindow.setFlags(flag, flag);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forget_password);
+        InitView();
+    }
+
+    private void InitView() {
+        black = (ImageView) findViewById(R.id.black);
+        black.setOnClickListener(this);
     }
 
     //点击物理返回按钮
@@ -32,5 +42,16 @@ public class Forget_password extends AppCompatActivity {
                 this.finish();
         }
         return super.onKeyUp(keyCode, event);
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.black:
+                Intent login = new Intent(Forget_password.this, Login.class);
+                startActivity(login);
+                this.finish();
+                break;
+        }
     }
 }

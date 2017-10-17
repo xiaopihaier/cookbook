@@ -37,10 +37,10 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
         myWindow.setFlags(flag, flag);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        Initview();
+        InitView();
     }
 
-    private void Initview() {
+    private void InitView() {
         black = (ImageView) findViewById(R.id.black);
         register = (TextView) findViewById(R.id.register);
         username_input = (EditText) findViewById(R.id.username_input);
