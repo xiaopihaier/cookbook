@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
@@ -18,6 +17,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -33,6 +34,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
     //记录用户首次点击返回键的时间
     private long firstTime = 0;
     static final int SHOW_RESPONSE = 0;
+    String Result;
 
 
     @Override
@@ -147,7 +149,12 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             switch (msg.what) {
                 case SHOW_RESPONSE:
                     String response = (String) msg.obj;
-                    Toast.makeText(Login.this, response, Toast.LENGTH_LONG).show();
+                    Json(response);
+                    if (Result.equals("登陆成功")) {
+                        Toast.makeText(Login.this, "成功", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(Login.this, "失败", Toast.LENGTH_LONG).show();
+                    }
             }
         }
     };
@@ -170,8 +177,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
                     StringBuilder response = new StringBuilder();
                     String line;
                     while ((line = reader.readLine()) != null) {
-                        //response.append(line);
-                        Log.i("msg1", response.append(line).toString());
+                        response.append(line);
                     }
                     Message message = new Message();
                     message.what = SHOW_RESPONSE;
@@ -183,6 +189,16 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
                 }
             }
         }).start();
+    }
+
+    private void Json(String jsonData) {
+        JSONObject object = null;
+        try {
+            object = new JSONObject(jsonData);
+            Result = object.getString("Result");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

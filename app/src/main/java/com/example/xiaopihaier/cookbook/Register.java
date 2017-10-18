@@ -2,16 +2,34 @@ package com.example.xiaopihaier.cookbook;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
+
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import static com.example.xiaopihaier.cookbook.Login.SHOW_RESPONSE;
 
 public class Register extends AppCompatActivity implements View.OnClickListener {
 
     ImageView black;
+    EditText username_input, password_input, Confirmation_password;
+    Button register;
+    String Result;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +49,11 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
     private void InitView() {
         black = (ImageView) findViewById(R.id.black);
         black.setOnClickListener(this);
+        username_input = (EditText) findViewById(R.id.username_input);
+        password_input = (EditText) findViewById(R.id.password_input);
+        Confirmation_password = (EditText) findViewById(R.id.Confirmation_password);
+        register = (Button) findViewById(R.id.register);
+        register.setOnClickListener(this);
     }
 
     //点击物理返回按钮
@@ -52,6 +75,76 @@ public class Register extends AppCompatActivity implements View.OnClickListener 
                 startActivity(login);
                 this.finish();
                 break;
+            case R.id.register:
+                if (username_input.getText().toString().trim().equals("")) {
+                    Toast.makeText(Register.this, "请输入用户名", Toast.LENGTH_LONG).show();
+                } else if (password_input.getText().toString().trim().equals("")) {
+                    Toast.makeText(Register.this, "请输入密码", Toast.LENGTH_LONG).show();
+                } else if (Confirmation_password.getText().toString().trim().equals("")) {
+                    Toast.makeText(Register.this, "请输入确认密码", Toast.LENGTH_LONG).show();
+                } else if (password_input.getText().toString().trim().equals(Confirmation_password.getText().toString().trim())) {
+                    setHttpURLConnection();
+                } else {
+                    Toast.makeText(Register.this, "两次输入的密码不同,请确认", Toast.LENGTH_LONG).show();
+                }
+                break;
+        }
+    }
+
+    Handler handler = new Handler() {
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case SHOW_RESPONSE:
+                    String response = (String) msg.obj;
+                    Json(response);
+                    if (Result.equals("注册成功")) {
+                        Toast.makeText(Register.this, "注册成功", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(Register.this, "该用户名已被注册", Toast.LENGTH_LONG).show();
+                    }
+            }
+        }
+    };
+
+    private void setHttpURLConnection() {
+        //开启线程发送网络请求
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                HttpURLConnection connection;
+                try {
+                    URL url = new URL("http://111.231.112.120:8080/AndroidApi/registered.jsp?username=" + username_input.getText().toString() + "&password=" + password_input.getText().toString());
+                    connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("GET");
+                    connection.setConnectTimeout(8000);
+                    connection.setReadTimeout(8000);
+                    InputStream in = connection.getInputStream();
+                    //对获得的数据进行读取
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        response.append(line);
+                    }
+                    Message message = new Message();
+                    message.what = SHOW_RESPONSE;
+                    //将服务器返回的值放入message中
+                    message.obj = response.toString();
+                    handler.sendMessage(message);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    private void Json(String jsonData) {
+        JSONObject object = null;
+        try {
+            object = new JSONObject(jsonData);
+            Result = object.getString("Result");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

@@ -2,6 +2,8 @@ package com.example.xiaopihaier.cookbook;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -12,11 +14,22 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import static com.example.xiaopihaier.cookbook.Login.SHOW_RESPONSE;
+
 public class Forget_password extends AppCompatActivity implements View.OnClickListener {
 
     ImageView black;
-    EditText username_input,password_input,Confirmation_password;
+    EditText username_input, password_input, Confirmation_password;
     Button Confirmation_modification;
+    String Result;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,10 +47,10 @@ public class Forget_password extends AppCompatActivity implements View.OnClickLi
     }
 
     private void InitView() {
-        username_input= (EditText) findViewById(R.id.username_input);
-        password_input= (EditText) findViewById(R.id.password_input);
-        Confirmation_password= (EditText) findViewById(R.id.Confirmation_password);
-        Confirmation_modification= (Button) findViewById(R.id.Confirmation_modification);
+        username_input = (EditText) findViewById(R.id.username_input);
+        password_input = (EditText) findViewById(R.id.password_input);
+        Confirmation_password = (EditText) findViewById(R.id.Confirmation_password);
+        Confirmation_modification = (Button) findViewById(R.id.Confirmation_modification);
         Confirmation_modification.setOnClickListener(this);
         black = (ImageView) findViewById(R.id.black);
         black.setOnClickListener(this);
@@ -63,9 +76,65 @@ public class Forget_password extends AppCompatActivity implements View.OnClickLi
                 this.finish();
                 break;
             case R.id.Confirmation_modification:
-                username_input.getText().toString();
-                Toast.makeText(Forget_password.this,"修改成功",Toast.LENGTH_LONG).show();
+                setHttpURLConnection();
                 break;
+        }
+    }
+
+    Handler handler = new Handler() {
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case SHOW_RESPONSE:
+                    String response = (String) msg.obj;
+                    Json(response);
+                    if (Result.equals("登陆成功")) {
+                        Toast.makeText(Forget_password.this, "修改成功", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(Forget_password.this, "修改失败", Toast.LENGTH_LONG).show();
+                    }
+            }
+        }
+    };
+
+    private void setHttpURLConnection() {
+        //开启线程发送网络请求
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                HttpURLConnection connection;
+                try {
+                    URL url = new URL("http://111.231.112.120:8080/AndroidApi/login.jsp?username=" + username_input.getText().toString() + "&password=" + password_input.getText().toString());
+                    connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("GET");
+                    connection.setConnectTimeout(8000);
+                    connection.setReadTimeout(8000);
+                    InputStream in = connection.getInputStream();
+                    //对获得的数据进行读取
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        response.append(line);
+                    }
+                    Message message = new Message();
+                    message.what = SHOW_RESPONSE;
+                    //将服务器返回的值放入message中
+                    message.obj = response.toString();
+                    handler.sendMessage(message);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    private void Json(String jsonData) {
+        JSONObject object = null;
+        try {
+            object = new JSONObject(jsonData);
+            Result = object.getString("Result");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
