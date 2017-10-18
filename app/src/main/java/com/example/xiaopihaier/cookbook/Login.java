@@ -3,7 +3,10 @@ package com.example.xiaopihaier.cookbook;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
@@ -16,6 +19,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 public class Login extends AppCompatActivity implements View.OnClickListener {
     ImageView black;
     TextView register, forget_password;
@@ -23,6 +32,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
     Button login;
     //记录用户首次点击返回键的时间
     private long firstTime = 0;
+    static final int SHOW_RESPONSE = 0;
 
 
     @Override
@@ -112,12 +122,12 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
                 break;
             //登陆按钮
             case R.id.login:
-                if (username_input.getText().toString().trim().equals("")){
-                    Toast.makeText(Login.this,"请输入用户名",Toast.LENGTH_LONG).show();
-                }else if (password_input.getText().toString().trim().equals("")){
-                    Toast.makeText(Login.this,"请输入密码",Toast.LENGTH_LONG).show();
-                }else {
-
+                if (username_input.getText().toString().trim().equals("")) {
+                    Toast.makeText(Login.this, "请输入用户名", Toast.LENGTH_LONG).show();
+                } else if (password_input.getText().toString().trim().equals("")) {
+                    Toast.makeText(Login.this, "请输入密码", Toast.LENGTH_LONG).show();
+                } else {
+                    setHttpURLConnection();
                 }
 
                 break;
@@ -131,4 +141,48 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
                 break;
         }
     }
+
+    Handler handler = new Handler() {
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case SHOW_RESPONSE:
+                    String response = (String) msg.obj;
+                    Toast.makeText(Login.this, response, Toast.LENGTH_LONG).show();
+            }
+        }
+    };
+
+    private void setHttpURLConnection() {
+        //开启线程发送网络请求
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                HttpURLConnection connection = null;
+                try {
+                    URL url = new URL("http://164e1o5218.51mypc.cn/AndroidApi/login.jsp?username=123&password=12");
+                    connection = (HttpURLConnection) url.openConnection();
+                    connection.setRequestMethod("GET");
+                    connection.setConnectTimeout(8000);
+                    connection.setReadTimeout(8000);
+                    InputStream in = connection.getInputStream();
+                    //对获得的数据进行读取
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        //response.append(line);
+                        Log.i("msg1", response.append(line).toString());
+                    }
+                    Message message = new Message();
+                    message.what = SHOW_RESPONSE;
+                    //将服务器返回的值放入message中
+                    message.obj = response.toString();
+                    handler.sendMessage(message);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
 }
