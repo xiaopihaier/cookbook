@@ -159,7 +159,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener {
             public void run() {
                 HttpURLConnection connection = null;
                 try {
-                    URL url = new URL("http://164e1o5218.51mypc.cn/AndroidApi/login.jsp?username=123&password=12");
+                    URL url = new URL("http://111.231.112.120:8080/AndroidApi/login.jsp?username="+username_input.getText().toString()+"&password="+password_input.getText().toString());
                     connection = (HttpURLConnection) url.openConnection();
                     connection.setRequestMethod("GET");
                     connection.setConnectTimeout(8000);
